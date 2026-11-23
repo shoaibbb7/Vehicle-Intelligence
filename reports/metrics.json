@@ -1,0 +1,70 @@
+{
+  "accuracy": 0.9775,
+  "macro_f1": 0.9774,
+  "macro_precision": 0.9782,
+  "macro_recall": 0.9776,
+  "weighted_f1": 0.9773,
+  "test_size": 400,
+  "classes": {
+    "Auto-Rickshaw": {
+      "precision": 0.951,
+      "recall": 0.975,
+      "f1_score": 0.963,
+      "support": 40
+    },
+    "Bike": {
+      "precision": 1.0,
+      "recall": 0.9,
+      "f1_score": 0.947,
+      "support": 40
+    },
+    "Bus": {
+      "precision": 1.0,
+      "recall": 0.951,
+      "f1_score": 0.975,
+      "support": 41
+    },
+    "Car": {
+      "precision": 0.952,
+      "recall": 1.0,
+      "f1_score": 0.976,
+      "support": 40
+    },
+    "Pickup": {
+      "precision": 0.976,
+      "recall": 1.0,
+      "f1_score": 0.988,
+      "support": 40
+    },
+    "SUV": {
+      "precision": 0.975,
+      "recall": 1.0,
+      "f1_score": 0.987,
+      "support": 39
+    },
+    "Scooter": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1_score": 1.0,
+      "support": 40
+    },
+    "Tractor": {
+      "precision": 1.0,
+      "recall": 0.95,
+      "f1_score": 0.974,
+      "support": 40
+    },
+    "Truck": {
+      "precision": 0.976,
+      "recall": 1.0,
+      "f1_score": 0.988,
+      "support": 40
+    },
+    "Van": {
+      "precision": 0.952,
+      "recall": 1.0,
+      "f1_score": 0.976,
+      "support": 40
+    }
+  }
+}

@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Page Not Found | Field Key Vehicle Classifier</title>
+<meta name="description" content="This Field Key page could not be found. Return to the vehicle classifier.">
+<meta name="robots" content="noindex, follow">
+<meta name="theme-color" content="#0f2b5c">
+<link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='favicon.svg') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+<main class="shell" style="max-width:48rem;min-height:100vh;display:grid;align-content:center;padding-block:3rem">
+  <nav aria-label="Breadcrumb" style="margin-bottom:2rem;color:var(--muted)">
+    <a href="{{ url_for('index') }}">Home</a> <span aria-hidden="true">/</span>
+    <span aria-current="page">Page not found</span>
+  </nav>
+  <span class="section-kicker">404 / PAGE NOT FOUND</span>
+  <h1 style="margin-block:1rem;font-size:clamp(2.5rem,8vw,4.5rem);line-height:1">This page took a wrong turn.</h1>
+  <p class="lead">The address may be outdated or mistyped. Head back to the vehicle classifier.</p>
+  <p style="display:flex;gap:1rem;flex-wrap:wrap;margin-top:2rem">
+    <a class="pill a dk" href="{{ url_for('index') }}">Go to the classifier</a>
+  </p>
+</main>
+</body>
+</html>

@@ -1,0 +1,626 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Vehicle Classifier | Explainable Vehicle Type Predictions</title>
+<meta name="description" content="Explore an educational vehicle classifier that predicts vehicle types from specifications and explains each result with a Decision Tree.">
+<meta name="theme-color" content="#0f2b5c">
+<link rel="canonical" href="{{ page_url }}">
+<meta property="og:type" content="website">
+<meta property="og:url" content="{{ page_url }}">
+<meta property="og:title" content="Vehicle Classifier | Explainable Vehicle Type Predictions">
+<meta property="og:description" content="Explore an educational vehicle classifier that predicts vehicle types from specifications and explains each result with a Decision Tree.">
+<meta property="og:image" content="{{ site_url }}{{ url_for('static', filename='images/social-card.png') }}">
+<meta property="og:image:alt" content="Field Key vehicle classifier: explainable vehicle type predictions">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Vehicle Classifier | Explainable Predictions">
+<meta name="twitter:description" content="Classify a vehicle from its specifications and inspect the Decision Tree path behind the result.">
+<meta name="twitter:image" content="{{ site_url }}{{ url_for('static', filename='images/social-card.png') }}">
+<meta name="twitter:image:alt" content="Field Key vehicle classifier: explainable vehicle type predictions">
+<meta name="robots" content="index, follow">
+<link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
+<link rel="alternate icon" href="/static/favicon.svg">
+<script type="application/ld+json">{{ {
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "Field Key Vehicle Classifier",
+  "applicationCategory": "EducationalApplication",
+  "operatingSystem": "Any",
+  "description": "An educational vehicle-type classifier using numeric vehicle specifications and an explainable Decision Tree model.",
+  "url": page_url,
+  "image": site_url ~ url_for('static', filename='images/social-card.png')
+}|tojson }}</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+<symbol id="ar" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></symbol>
+<symbol id="au" viewBox="0 0 24 24"><path d="M7 17 17 7M8 7h9v9"/></symbol>
+<symbol id="x" viewBox="0 0 24 24"><path d="M4 4l16 16M20 4 4 20"/></symbol>
+<symbol id="mn" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></symbol>
+<symbol id="dice" viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="20" rx="4"/><circle cx="8" cy="8" r="1.5" fill="currentColor"/><circle cx="16" cy="16" r="1.5" fill="currentColor"/><circle cx="12" cy="12" r="1.5" fill="currentColor"/></symbol>
+<symbol id="cp2" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4c0-1.1.9-2 2-2h9a2 2 0 0 1 2 2v1"/></symbol>
+<symbol id="dl" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></symbol>
+<symbol id="vs" viewBox="0 0 24 24"><path d="M16 3h5v5M4 20 21 3M21 16v5h-5M15 15l6 6M4 4l5 5"/></symbol>
+<symbol id="sl" viewBox="0 0 24 24"><path d="M4 21v-7M4 10V3M12 21v-9M12 8V3M20 21v-5M20 12V3M1 14h6M9 8h6M17 16h6"/></symbol>
+<symbol id="ck" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></symbol>
+<symbol id="tr" viewBox="0 0 24 24"><path d="M3 6h18M6 6v14a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V6M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></symbol>
+<symbol id="hist" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></symbol>
+<symbol id="up" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12"/></symbol>
+<symbol id="spark" viewBox="0 0 24 24"><path d="m12 3-1.9 5.8a2 2 0 0 1-1.3 1.3L3 12l5.8 1.9a2 2 0 0 1 1.3 1.3L12 21l1.9-5.8a2 2 0 0 1 1.3-1.3L21 12l-5.8-1.9a2 2 0 0 1-1.3-1.3z"/></symbol>
+</defs></svg>
+<a class="skip" href="#main">Skip to content</a>
+<div class="sbar" aria-hidden="true"></div>
+
+<aside class="sidebar" id="sidebar" aria-label="Application navigation" aria-hidden="false">
+ <a class="side-brand" href="#home"><span class="brand-mark">V<span>.</span></span><span>VEHICLE CLASSIFIER<br><b>DECISION TREE ML</b></span></a>
+ <nav class="side-nav">
+  <a href="#home" aria-current="page"><svg class="i"><use href="#spark"/></svg><span>Project Overview</span></a>
+  <a href="#classifier"><svg class="i"><use href="#vs"/></svg><span>Vehicle Classifier</span></a>
+  <a href="#metrics"><svg class="i"><use href="#cp2"/></svg><span>Model Performance</span></a>
+  <a href="#analytics-section"><svg class="i"><use href="#sl"/></svg><span>Analytics &amp; Insights</span></a>
+  <a href="#batch-section"><svg class="i"><use href="#up"/></svg><span>Batch CSV Test</span></a>
+  <a href="#history-section"><svg class="i"><use href="#hist"/></svg><span>Detection History</span></a>
+  <a href="#video-section"><svg class="i"><use href="#up"/></svg><span>Video Detection</span></a>
+ </nav>
+ <div class="side-foot" data-service-state="checking">
+  <span class="online-dot service-dot" aria-hidden="true"></span><span>INFERENCE API</span><b data-service-label="side">CHECKING</b>
+  <small>DECISION TREE · SYNTHETIC DATA</small>
+ </div>
+</aside>
+
+<div id="loader" role="status" aria-label="Loading">
+ <div class="lc"><div class="lb">Vehicle Intelligence</div><p>Initializing local classification engine.</p></div>
+ <div class="lp"><div class="tr"><i id="lf"></i></div><div class="lr"><span>Loading model</span><b id="ln">000</b></div></div>
+</div>
+
+<header class="hd" id="hd">
+ <div class="topline">
+  <button class="nav-toggle" id="navToggle" type="button" aria-controls="sidebar" aria-expanded="true" aria-label="Hide navigation"><svg class="i" aria-hidden="true"><use href="#mn"/></svg><span>Hide navigation</span></button>
+  <nav class="crumb" aria-label="Breadcrumb"><span class="crumb-mark" aria-hidden="true">VI</span><a href="/">Home</a><i aria-hidden="true"></i><span aria-current="page">Vehicle classifier</span></nav>
+  <div class="top-tools"><span class="system-status" data-service-state="checking" role="status" aria-live="polite" aria-atomic="true"><span class="online-dot service-dot" aria-hidden="true"></span><span data-service-label="system">CHECKING INFERENCE API</span></span><span class="top-divider"></span><span class="clock" id="c1">--:--</span><span class="date" id="c2">--</span></div>
+  <button class="mb" id="mo" type="button" aria-haspopup="dialog" aria-controls="menu" aria-expanded="false" aria-label="Open menu"><svg class="i" aria-hidden="true"><use href="#mn"/></svg></button>
+ </div>
+</header>
+
+<main id="main">
+<!-- ═══════ DASHBOARD OVERVIEW ═══════ -->
+<section id="home" class="hero">
+ <div class="shell">
+  <div class="page-heading">
+   <div>
+    <div class="eyebrow"><span class="pulse-dot"></span> MACHINE LEARNING · DECISION TREE</div>
+    <h1>Vehicle Type Classification System</h1>
+    <p>Explore how a Decision Tree classifies vehicle specifications. The model is trained on synthetic data, so its predictions are educational estimates rather than verified real-world results.</p>
+   </div>
+   <a class="heading-action" href="#classifier"><span class="action-pulse"></span> OPEN CLASSIFIER <svg class="i"><use href="#ar"/></svg></a>
+  </div>
+  <div class="overview-grid" aria-label="Model overview">
+   <div class="overview-stat"><span>MODEL STATUS</span><b data-service-state="checking"><i class="online-dot service-dot" aria-hidden="true"></i><span data-service-label="model">MODEL CHECKING</span></b><small>Decision Tree · v1.0</small></div>
+   <div class="overview-stat"><span>VEHICLE CLASSES</span><b>10</b><small>Recognized categories</small></div>
+   <div class="overview-stat"><span>MODEL INPUTS</span><b>8</b><small>Vehicle specifications</small></div>
+   <div class="overview-stat"><span>TRAINING RECORDS</span><b>2,000</b><small>Synthetic generated rows</small></div>
+  </div>
+  <div class="scene-panel" aria-label="Vehicle classification uses dimensional specifications">
+   <div class="scene-copy">
+    <span class="scene-kicker"><span class="scene-dot"></span> PERCEPTION WORKSPACE <span class="scene-line"></span> READY</span>
+    <h2>Understand every<br><span>vehicle signal.</span></h2>
+    <p>Explore a vehicle profile, classify its specifications, and inspect the decision path behind every prediction.</p>
+    <div class="scene-meta"><span>01 <b>SPECIFICATION INPUT</b></span><span>02 <b>MODEL INFERENCE</b></span><span>03 <b>EXPLAINABLE OUTPUT</b></span></div>
+   </div>
+   <div class="scene-visual" aria-hidden="true">
+    <div class="scene-grid"></div>
+    <span class="scene-coordinate coord-a">X 04.28 / Y 01.52</span>
+    <span class="scene-coordinate coord-b">DIMENSIONAL PROFILE</span>
+    <div class="scan-frame"><span></span><span></span><span></span><span></span><svg viewBox="0 0 520 230" role="presentation"><path d="M56 157h35l24-43c8-13 18-21 34-24l47-8 43-42c10-10 21-15 36-15h83c14 0 26 6 35 17l45 54 40 14c14 5 23 16 26 30l6 17h-38a34 34 0 0 0-68 0H190a34 34 0 0 0-68 0H56Z"/><path d="m202 82 40-38c6-6 13-9 22-9h49v48Zm124-47h31c8 0 15 3 21 10l32 38h-84Z"/><circle cx="156" cy="158" r="20"/><circle cx="440" cy="158" r="20"/><path class="dimension" d="M56 200h420m-420-7v14m420-14v14"/><path class="dimension" d="M498 30v143m-7-143h14m-14 143h14"/></svg><div class="scan-beam"></div><span class="frame-label">VEHICLE PROFILE <b>4-WHEEL / CLASS?</b></span></div>
+    <div class="scene-readout"><span>MODEL INPUT</span><b>8 <small>FEATURES</small></b><i></i><span>LOCAL INFERENCE</span></div>
+   </div>
+  </div>
+ </div>
+</section>
+
+<!-- ═══════ CLASSIFIER ═══════ -->
+<section id="classifier" class="sec classifier-section"><div class="shell">
+ <div class="section-heading">
+   <div><span class="section-kicker">01 / MODEL INFERENCE</span><h2>Interactive vehicle classifier</h2><p>Enter vehicle specifications or select a preset. The model predicts the vehicle category in real-time with confidence scores and decision path explanation.</p></div>
+   <span class="workspace-state"><i class="online-dot"></i> READY FOR INPUT</span>
+ </div>
+
+ <div class="tool">
+  <form class="fc rv" id="key" novalidate aria-label="Vehicle specifications">
+   <div class="preset-box">
+     <div class="ex" role="group" aria-label="Generic vehicle samples">
+       <span class="preset-title">Generic classes:</span>
+       <button type="button" data-s="bike" title="Motorcycle"><span class="btn-ic">🏍️</span> Bike</button>
+       <button type="button" data-s="scooter" title="Scooter / Moped"><span class="btn-ic">🛵</span> Scooter</button>
+       <button type="button" data-s="rick" title="Auto-rickshaw"><span class="btn-ic">🛺</span> Auto-rickshaw</button>
+       <button type="button" data-s="car" title="Sedan or hatchback"><span class="btn-ic">🚗</span> Car</button>
+       <button type="button" data-s="suv" title="Sport utility vehicle"><span class="btn-ic">🚙</span> SUV</button>
+       <button type="button" data-s="pickup" title="Pickup truck"><span class="btn-ic">🛻</span> Pickup</button>
+       <button type="button" data-s="van" title="Passenger or cargo van"><span class="btn-ic">🚐</span> Van</button>
+       <button type="button" data-s="tractor" title="Farm tractor"><span class="btn-ic">🚜</span> Tractor</button>
+       <button type="button" data-s="truck" title="Commercial freight truck"><span class="btn-ic">🚚</span> Truck</button>
+       <button type="button" data-s="bus" title="Passenger transit bus"><span class="btn-ic">🚌</span> Bus</button>
+     </div>
+     <div class="ex" role="group" aria-label="Real vehicle presets">
+       <span class="preset-title">Real vehicles:</span>
+       <button type="button" data-s="corolla" title="Toyota Corolla sedan">Corolla</button>
+       <button type="button" data-s="civic" title="Honda Civic">Civic</button>
+       <button type="button" data-s="fortuner" title="Toyota Fortuner 4x4">Fortuner</button>
+       <button type="button" data-s="creta" title="Hyundai Creta">Creta</button>
+       <button type="button" data-s="hilux" title="Toyota Hilux pickup">Hilux</button>
+       <button type="button" data-s="sprinter" title="Mercedes Sprinter van">Sprinter</button>
+       <button type="button" data-s="splendor" title="Hero Splendor 100cc">Splendor</button>
+       <button type="button" data-s="activa" title="Honda Activa scooter">Activa</button>
+       <button type="button" data-s="deere" title="John Deere tractor">John Deere</button>
+       <button type="button" data-s="eicher" title="Eicher Pro commercial">Eicher Truck</button>
+       <button type="button" data-s="volvo" title="Volvo 9600 multi-axle">Volvo Bus</button>
+     </div>
+   </div>
+
+   <div class="fl" id="fields"></div>
+   <p class="range-note">Outside-range values are accepted, but predictions may be less reliable.</p>
+   <p class="privacy-note">Specifications are sent to this server for prediction; recent history stays in this browser. <a href="#data-privacy">Data, model &amp; privacy details</a></p>
+
+   <div class="act">
+    <button class="pill a dk" type="submit">Classify vehicle<span class="b"><svg class="i"><use href="#au"/></svg></span></button>
+    <button class="pill ol" type="reset">Reset</button>
+    <button class="pill ol rand-btn" type="button" id="randomBtn" title="Generate random specs">
+      <svg class="i" style="font-size:1rem"><use href="#dice"/></svg> Surprise me
+    </button>
+   </div>
+  </form>
+
+  <div class="rc rv" style="--d:120ms" aria-live="polite">
+   <div class="rc-header">
+     <small>Prediction Output</small>
+     <span class="engine-badge">Decision Tree v1.0</span>
+   </div>
+   <div id="out">
+     <div class="empty-state">
+       <p class="em">Pick a sample or input specifications above, then click <strong>Classify vehicle</strong>.</p>
+     </div>
+   </div>
+   <div class="share-bar" id="shareBar" style="display:none">
+    <button class="pill ol sm" id="copyBtn" title="Copy result"><svg class="i"><use href="#cp2"/></svg> Copy summary</button>
+    <button class="pill ol sm" id="downloadBtn" title="Download image card"><svg class="i"><use href="#dl"/></svg> Save image card</button>
+   </div>
+   <div class="radar-wrap" id="radarWrap" style="display:none">
+     <span class="radar-title">Feature Profile vs. Class Average</span>
+     <canvas id="radarCanvas" width="280" height="280"></canvas>
+   </div>
+  </div>
+ </div>
+</div></section>
+
+<section id="analytics-section" class="sec analytics-section"><div class="shell">
+ <div class="section-heading">
+  <div><span class="section-kicker">02 / ACTIVITY OVERVIEW</span><h2>Analytics &amp; insights</h2><p>Live totals and class distribution from this browser's saved classification history.</p></div>
+  <span class="workspace-state"><i class="online-dot"></i> LOCAL HISTORY</span>
+ </div>
+ <div class="analytics-grid">
+  <div class="analytics-stat"><span>CLASSIFICATIONS</span><b id="analyticsTotal">0</b><small>Saved in this browser</small></div>
+  <div class="analytics-stat"><span>TOP PREDICTED CLASS</span><b id="analyticsTop">—</b><small id="analyticsTopCount">No predictions yet</small></div>
+  <div class="analytics-stat"><span>AVERAGE CONFIDENCE</span><b id="analyticsConfidence">—</b><small>Across saved predictions</small></div>
+ </div>
+ <div class="distribution-panel"><div class="distribution-heading"><div><span class="section-kicker">CLASS DISTRIBUTION</span><h3>Prediction activity</h3></div><span id="analyticsWindow">LAST 20 PREDICTIONS</span></div><div id="analyticsChart" class="analytics-chart"><p class="analytics-empty">Classify a vehicle to populate local activity insights.</p></div></div>
+</div></section>
+
+<!-- ═══════ BATCH CSV UPLOAD ═══════ -->
+<section id="batch-section" class="sec tint" style="margin-inline:0"><div class="shell">
+ <div style="text-align:center;display:grid;justify-items:center;gap:1rem">
+   <span class="eb bd rv"><svg class="i" style="font-size:.875rem"><use href="#up"/></svg> Bulk Processing</span>
+   <h2 class="h2 lines">Batch CSV classification</h2>
+   <p class="rv" style="max-width:38rem;color:var(--t5);font-size:.9375rem">Upload a dataset containing vehicle specifications to predict all rows in bulk with full probability scores.</p>
+ </div>
+
+ <div class="batch-card rv" style="margin-top:2rem">
+   <div class="drop-zone" id="dropZone">
+     <input type="file" id="csvFileInput" accept=".csv" style="display:none">
+     <div class="drop-content">
+       <div class="drop-icon"><svg class="i" style="font-size:2.5rem"><use href="#up"/></svg></div>
+       <h3>Drag & Drop CSV file here</h3>
+       <p>or click to browse from your device (Max 500 rows)</p>
+       <div class="drop-actions">
+         <button class="pill a dk" type="button" id="browseCsvBtn">Select CSV File<span class="b"><svg class="i"><use href="#ar"/></svg></span></button>
+         <a class="pill ol sm" href="/sample-csv" download title="Download a template with required columns"><svg class="i"><use href="#dl"/></svg> Download sample CSV template</a>
+       </div>
+     </div>
+   </div>
+
+   <div class="batch-preview" id="batchPreview" style="display:none">
+     <div class="batch-meta">
+       <div class="bm-info">
+         <h4 id="batchFileName">vehicles.csv</h4>
+         <span id="batchCountBadge" class="count-badge">0 rows classified</span>
+       </div>
+       <div class="bm-actions">
+         <button class="pill a dk sm" id="downloadClassifiedBtn"><svg class="i"><use href="#dl"/></svg> Download Classified CSV</button>
+       </div>
+     </div>
+     <div class="batch-summary-chips" id="batchSummaryChips"></div>
+     <div class="table-wrap">
+       <table class="data-table" id="batchTable">
+         <thead>
+           <tr>
+             <th>#</th>
+             <th>Predicted Class</th>
+             <th>Confidence</th>
+             <th>Wheels</th>
+             <th>Length (m)</th>
+             <th>Width (m)</th>
+             <th>Height (m)</th>
+             <th>Weight (kg)</th>
+             <th>Engine (cc)</th>
+             <th>Seats</th>
+             <th>Top Speed (km/h)</th>
+           </tr>
+         </thead>
+         <tbody id="batchTableBody"></tbody>
+       </table>
+     </div>
+   </div>
+ </div>
+</div></section>
+
+<!-- ═══════ VIDEO VEHICLE COUNTER ═══════ -->
+<section id="video-section" class="sec" style="padding-top:2rem"><div class="shell">
+ <div class="section-heading">
+ <div><span class="section-kicker">03 / VIDEO PERCEPTION</span><h2>Count vehicles in a video</h2><p>Track unique bicycles, motorcycles, cars, buses, and trucks in an uploaded clip. Processing runs on this server.</p></div>
+  <span class="workspace-state">YOLO · BYTETRACK</span>
+ </div>
+
+ <div class="batch-card video-card rv" style="margin-top:2rem">
+   <div class="drop-zone" id="videoDropZone">
+     <input type="file" id="videoFileInput" accept=".avi,.mkv,.mov,.mp4,.webm" style="display:none">
+     <div class="drop-content">
+       <div class="drop-icon"><svg class="i" style="font-size:2.5rem"><use href="#up"/></svg></div>
+       <h3 id="videoFileName">Drop a video here</h3>
+       <p>MP4, MOV, AVI, MKV or WebM · max 100 MB · max 2 minutes</p>
+       <button class="pill a dk" type="button" id="browseVideoBtn">Choose video<span class="b"><svg class="i"><use href="#ar"/></svg></span></button>
+     </div>
+   </div>
+
+   <div class="video-actions">
+     <p id="videoStatus" role="status" aria-live="polite">Choose a video to begin.</p>
+     <button class="pill a dk" type="button" id="analyzeVideoBtn" disabled>Scan video<span class="b"><svg class="i"><use href="#au"/></svg></span></button>
+   </div>
+   <div class="video-results" id="videoResults" hidden aria-live="polite">
+     <h3 id="videoTotal"></h3>
+     <ul class="video-counts" id="videoCounts"></ul>
+   </div>
+ </div>
+</div></section>
+
+<!-- ═══════ SENSITIVITY ═══════ -->
+<section id="sensitivity-section" class="sec" style="padding-top:2rem"><div class="shell">
+ <div class="section-heading">
+  <div>
+   <span class="section-kicker">03 / SENSITIVITY EXPLORER</span>
+   <h2 class="h2 lines">Feature sensitivity</h2>
+   <p>Perturb individual vehicle attributes in real time to observe decision boundary thresholds, confidence shifts, and classification transitions.</p>
+  </div>
+  <span class="workspace-state"><i class="online-dot"></i> REAL-TIME INFERENCE</span>
+ </div>
+
+ <!-- Baseline selector bar -->
+ <div class="sens-baseline-bar" style="margin-top:1.5rem">
+  <span class="sens-baseline-label">Baseline Vehicle:</span>
+  <div class="sens-presets-group" id="sensPresets">
+   <button type="button" class="sens-preset-btn active" data-sens-preset="car">🚗 Car</button>
+   <button type="button" class="sens-preset-btn" data-sens-preset="bike">🏍️ Bike</button>
+   <button type="button" class="sens-preset-btn" data-sens-preset="scooter">🛵 Scooter</button>
+   <button type="button" class="sens-preset-btn" data-sens-preset="rick">🛺 Auto-Rickshaw</button>
+   <button type="button" class="sens-preset-btn" data-sens-preset="suv">🚙 SUV</button>
+   <button type="button" class="sens-preset-btn" data-sens-preset="pickup">🛻 Pickup</button>
+   <button type="button" class="sens-preset-btn" data-sens-preset="van">🚐 Van</button>
+   <button type="button" class="sens-preset-btn" data-sens-preset="tractor">🚜 Tractor</button>
+   <button type="button" class="sens-preset-btn" data-sens-preset="truck">🚛 Truck</button>
+   <button type="button" class="sens-preset-btn" data-sens-preset="bus">🚌 Bus</button>
+   <button type="button" class="sens-reset-btn" id="sensResetBtn" title="Reset to current baseline">↺ Reset Values</button>
+  </div>
+ </div>
+
+ <div class="sens-tool" style="margin-top:1.5rem">
+  <div class="sens-sliders" id="sensFields"></div>
+  <div class="sens-result" id="sensResult">
+    <p class="em" style="color:var(--t5)">Adjust the sliders to see the prediction change.</p>
+  </div>
+ </div>
+</div></section>
+
+<!-- ═══════ HISTORY ═══════ -->
+<section id="history-section" class="sec" style="padding-top:2rem"><div class="shell">
+ <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem">
+  <div>
+    <span class="section-kicker">04 / DETECTION HISTORY</span>
+    <h2 class="section-title" style="margin-top:.65rem">Recent classifications</h2>
+  </div>
+  <button class="pill ol sm" id="clearHistory" style="display:none"><svg class="i"><use href="#tr"/></svg> Clear history</button>
+ </div>
+ <div id="historyList" class="hist-list rv" style="margin-top:2rem">
+   <p class="em" style="color:var(--t5)">No classifications yet. Try the classifier above!</p>
+ </div>
+</div></section>
+
+<details id="learn-more" class="learn-more">
+ <summary>
+  <span class="learn-more-copy">
+   <span class="section-kicker">ADDITIONAL CONTEXT</span>
+   <strong>Data, model and vehicle classification</strong>
+   <span>Training data, evaluation, privacy, use cases and reference datasets</span>
+  </span>
+  <span class="learn-more-indicator" aria-hidden="true">+</span>
+ </summary>
+ <div class="learn-more-content">
+<section id="data-privacy" class="sec"><div class="shell">
+ <span class="section-kicker">PROVENANCE &amp; PRIVACY</span>
+ <h2 class="h2 lines" style="margin-top:.65rem">Training data, evaluation and privacy</h2>
+ <div class="privacy-grid">
+  <article><h3>Training data</h3><p>The classifier is trained on 2,000 synthetic rows generated by <code>src/generate_data.py</code> (200 per class, with 1% synthetic label noise). These are generated examples, not measured vehicle records.</p></article>
+  <article><h3>Model and evaluation</h3><p>A scikit-learn Decision Tree is selected with five-fold macro-F1 cross-validation on the training split, then evaluated on a separate stratified 400-row test split. Reported test metrics describe this synthetic dataset only; performance on real vehicles has not been established.</p></article>
+  <article><h3>How information is handled</h3><p>Specifications are sent to this app's server for inference. Up to 20 recent predictions are stored in this browser's local storage. CSV data is processed for the request; video uploads use a temporary server file that the app attempts to delete after analysis. Hosting logs and retention depend on the deployment provider. The page also requests fonts from Google Fonts. Avoid submitting sensitive information.</p></article>
+ </div>
+</div></section>
+
+<!-- ═══════ CLASSES ═══════ -->
+<section id="classes" class="sec" style="padding-top:2rem"><div class="shell"><span class="eb rv">Class schemes</span><h2 class="h2 lines" style="margin-top:1.25rem">How many classes?</h2>
+ <p class="lead rv">There's no single universal list of classes. A simple project uses 4 to 6 classes (bike, car, bus, truck). The US Federal Highway Administration uses a 13-class scheme based largely on axle count and configuration. Indian systems often add classes for auto-rickshaws, e-rickshaws, tractors and light commercial vehicles, so define your classes before collecting data.</p>
+ <ul class="rows sm" id="schemes"></ul></div></section>
+
+<!-- ═══════ USES & CHALLENGES ═══════ -->
+<section id="uses" class="sec tint" style="margin-inline:0"><div class="shell two">
+ <div><span class="eb rv">Applications</span><h2 class="h2 lines" style="margin-top:1.25rem">Where it's used</h2><ul class="ls" id="apps"></ul></div>
+ <div id="challenges"><span class="eb rv">Challenges</span><h2 class="h2 lines" style="margin-top:1.25rem">Common challenges</h2><ul class="ls" id="chal"></ul></div>
+</div></section>
+
+</div>
+</details>
+
+<!-- ═══════ METRICS ═══════ -->
+<section id="metrics" class="sec"><div class="shell">
+ <div class="section-heading"><div><span class="section-kicker">05 / MODEL PERFORMANCE</span><h2>Evaluation metrics &amp; model profile</h2><p>Metrics below are from a stratified 400-row test split of the synthetic dataset. Five-fold cross-validation was used for model selection; real-world performance is unverified.</p></div><span class="workspace-state">DECISION TREE · v1.0</span></div>
+
+ <div class="metrics-kpi-grid">
+  <div class="metrics-kpi-card">
+   <span>Test Accuracy</span>
+   <b>97.8%</b>
+   <small>400 test holdouts (stratified)</small>
+  </div>
+  <div class="metrics-kpi-card">
+   <span>Macro F1-Score</span>
+   <b>0.977</b>
+   <small>Held-out test split (n = 400)</small>
+  </div>
+  <div class="metrics-kpi-card">
+   <span>Macro Precision</span>
+   <b>97.8%</b>
+   <small>Minimal false positive rate</small>
+  </div>
+  <div class="metrics-kpi-card">
+   <span>Macro Recall</span>
+   <b>97.8%</b>
+   <small>Class detection sensitivity</small>
+  </div>
+ </div>
+
+ <div class="model-profile">
+  <div><span>MODEL TYPE</span><b>Decision Tree</b></div>
+  <div><span>CRITERION</span><b>Entropy (Info Gain)</b></div>
+  <div><span>VEHICLE CLASSES</span><b>10 Categories</b></div>
+  <div><span>FEATURE INPUTS</span><b>8 Specifications</b></div>
+  <div><span>TREE DEPTH</span><b>6 levels (pruned)</b></div>
+ </div>
+
+ <!-- Evaluation Artifacts Gallery -->
+ <div class="eval-card">
+  <div class="eval-tabs-bar" role="tablist">
+   <button class="eval-tab-btn active" data-tab="matrix" role="tab" aria-selected="true" type="button"><svg class="i"><use href="#sl"/></svg> Confusion Matrix</button>
+   <button class="eval-tab-btn" data-tab="importance" role="tab" aria-selected="false" type="button"><svg class="i"><use href="#spark"/></svg> Feature Importance</button>
+   <button class="eval-tab-btn" data-tab="tree" role="tab" aria-selected="false" type="button"><svg class="i"><use href="#vs"/></svg> Decision Tree Structure</button>
+  </div>
+
+  <div id="eval-tab-matrix" class="eval-tab-content active" role="tabpanel">
+   <div class="eval-img-wrapper">
+    <img src="/reports/confusion_matrix.png" alt="Confusion matrix showing vehicle-class prediction results for 400 test records" loading="lazy" class="zoomable-img" data-title="Confusion Matrix (400 Test Vehicles)">
+   </div>
+   <div class="eval-caption">
+    <span><b>Figure 1:</b> 10-Class Confusion Matrix evaluated on 400 holdout records. Shows zero confusion between two-wheelers and commercial heavy vehicles.</span>
+    <span class="eval-zoom-hint"><svg class="i"><use href="#au"/></svg> Click image to enlarge</span>
+   </div>
+  </div>
+
+  <div id="eval-tab-importance" class="eval-tab-content" role="tabpanel">
+   <div class="eval-img-wrapper">
+    <img src="/reports/feature_importance.png" alt="Bar chart ranking the vehicle specification features by model importance" loading="lazy" class="zoomable-img" data-title="Feature Importance Ranking">
+   </div>
+   <div class="eval-caption">
+    <span><b>Figure 2:</b> Relative feature importance ranking. Curb weight, wheel count, and engine displacement exhibit the highest discriminatory power.</span>
+    <span class="eval-zoom-hint"><svg class="i"><use href="#au"/></svg> Click image to enlarge</span>
+   </div>
+  </div>
+
+  <div id="eval-tab-tree" class="eval-tab-content" role="tabpanel">
+   <div class="eval-img-wrapper">
+    <img src="/reports/tree.png" alt="Diagram of the trained Decision Tree and its vehicle classification branches" loading="lazy" class="zoomable-img" data-title="Decision Tree Architecture">
+   </div>
+   <div class="eval-caption">
+    <span><b>Figure 3:</b> Full Decision Tree architecture visualization showing entropy-based decision splits down to max depth 6.</span>
+    <span class="eval-zoom-hint"><svg class="i"><use href="#au"/></svg> Click image to enlarge</span>
+   </div>
+  </div>
+ </div>
+
+ <!-- Per-Class Classification Report Table -->
+ 
+ <div class="eval-table-card">
+  <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:1rem">
+   <div>
+    <h3>Per-Class Performance Report</h3>
+    <p>Detailed precision, recall, and F1-score breakdown across all 10 vehicle types on the test split.</p>
+   </div>
+   <span class="workspace-state"><i class="online-dot"></i> N = 400 EVALUATED</span>
+  </div>
+  <div class="eval-table-wrap">
+   <table class="eval-table">
+    <thead>
+     <tr>
+      <th>Vehicle Class</th>
+      <th>Precision</th>
+      <th>Recall</th>
+      <th>F1-Score</th>
+      <th>Test Support</th>
+      <th>Evaluation</th>
+     </tr>
+    </thead>
+    <tbody>
+     
+     <tr>
+      <td><b>Auto-Rickshaw</b></td>
+      <td><span class="eval-badge good">95.1%</span></td>
+      <td><span class="eval-badge good">97.5%</span></td>
+      <td><span class="eval-badge good">0.963</span></td>
+      <td>40</td>
+      <td><span style="color:#059669;font-weight:600;font-size:.8rem">Evaluated</span></td>
+     </tr>
+     
+     <tr>
+      <td><b>Bike</b></td>
+      <td><span class="eval-badge high">100.0%</span></td>
+      <td><span class="eval-badge good">90.0%</span></td>
+      <td><span class="eval-badge good">0.947</span></td>
+      <td>40</td>
+      <td><span style="color:#059669;font-weight:600;font-size:.8rem">Evaluated</span></td>
+     </tr>
+     
+     <tr>
+      <td><b>Bus</b></td>
+      <td><span class="eval-badge high">100.0%</span></td>
+      <td><span class="eval-badge good">95.1%</span></td>
+      <td><span class="eval-badge good">0.975</span></td>
+      <td>41</td>
+      <td><span style="color:#059669;font-weight:600;font-size:.8rem">Evaluated</span></td>
+     </tr>
+     
+     <tr>
+      <td><b>Car</b></td>
+      <td><span class="eval-badge good">95.2%</span></td>
+      <td><span class="eval-badge high">100.0%</span></td>
+      <td><span class="eval-badge good">0.976</span></td>
+      <td>40</td>
+      <td><span style="color:#059669;font-weight:600;font-size:.8rem">Evaluated</span></td>
+     </tr>
+     
+     <tr>
+      <td><b>Pickup</b></td>
+      <td><span class="eval-badge good">97.6%</span></td>
+      <td><span class="eval-badge high">100.0%</span></td>
+      <td><span class="eval-badge high">0.988</span></td>
+      <td>40</td>
+      <td><span style="color:#059669;font-weight:600;font-size:.8rem">Evaluated</span></td>
+     </tr>
+     
+     <tr>
+      <td><b>SUV</b></td>
+      <td><span class="eval-badge good">97.5%</span></td>
+      <td><span class="eval-badge high">100.0%</span></td>
+      <td><span class="eval-badge high">0.987</span></td>
+      <td>39</td>
+      <td><span style="color:#059669;font-weight:600;font-size:.8rem">Evaluated</span></td>
+     </tr>
+     
+     <tr>
+      <td><b>Scooter</b></td>
+      <td><span class="eval-badge high">100.0%</span></td>
+      <td><span class="eval-badge high">100.0%</span></td>
+      <td><span class="eval-badge high">1.000</span></td>
+      <td>40</td>
+      <td><span style="color:#059669;font-weight:600;font-size:.8rem">Evaluated</span></td>
+     </tr>
+     
+     <tr>
+      <td><b>Tractor</b></td>
+      <td><span class="eval-badge high">100.0%</span></td>
+      <td><span class="eval-badge good">95.0%</span></td>
+      <td><span class="eval-badge good">0.974</span></td>
+      <td>40</td>
+      <td><span style="color:#059669;font-weight:600;font-size:.8rem">Evaluated</span></td>
+     </tr>
+     
+     <tr>
+      <td><b>Truck</b></td>
+      <td><span class="eval-badge good">97.6%</span></td>
+      <td><span class="eval-badge high">100.0%</span></td>
+      <td><span class="eval-badge high">0.988</span></td>
+      <td>40</td>
+      <td><span style="color:#059669;font-weight:600;font-size:.8rem">Evaluated</span></td>
+     </tr>
+     
+     <tr>
+      <td><b>Van</b></td>
+      <td><span class="eval-badge good">95.2%</span></td>
+      <td><span class="eval-badge high">100.0%</span></td>
+      <td><span class="eval-badge good">0.976</span></td>
+      <td>40</td>
+      <td><span style="color:#059669;font-weight:600;font-size:.8rem">Evaluated</span></td>
+     </tr>
+     
+    </tbody>
+   </table>
+  </div>
+ </div>
+ 
+
+</div></section>
+
+<details id="reference-material" class="learn-more">
+ <summary>
+  <span class="learn-more-copy">
+   <span class="section-kicker">REFERENCE MATERIAL</span>
+   <strong>Datasets and future directions</strong>
+   <span>Explore external datasets and possible extensions</span>
+  </span>
+  <span class="learn-more-indicator" aria-hidden="true">+</span>
+ </summary>
+ <div class="learn-more-content">
+<!-- ═══════ DATASETS ═══════ -->
+<section id="datasets" class="sec" style="padding-top:2rem"><div class="shell"><span class="eb rv">Image-based</span><h2 class="h2 lines" style="margin-top:1.25rem">Well-known datasets</h2><ul class="ls ds" id="data"></ul>
+ <p class="rv" style="margin-top:1.25rem;color:var(--t5);font-size:.9375rem">Check each dataset's current license and class list before relying on it.</p></div></section>
+
+<section class="sec" style="padding-top:0"><div class="shell"><div class="sp rv" style="--y:40px"><span class="eb lg">By the numbers</span><h2 class="lines">What's inside the model.</h2>
+ <ul class="sg"><li><b data-n="10">0</b><span>Vehicle classes</span></li><li><b data-n="8">0</b><span>Specifications read</span></li><li><b data-n="2000" data-f="1">0</b><span>Synthetic training rows</span></li><li><b data-n="6">0</b><span>Levels deep</span></li></ul></div></div></section>
+
+<section class="sec" style="padding-top:0"><div class="shell"><span class="eb rv">Future directions</span><p class="fut wd" style="margin-top:1.25rem">Edge AI on cheap devices, multi-sensor fusion (camera plus radar or LiDAR), transformer-based detectors, vehicle re-identification across cameras, and electric vehicle recognition.</p></div></section>
+ </div>
+</details>
+</main>
+
+<footer><div class="shell">
+ <div class="fcta"><h2 class="h2 lines">Got a vehicle in mind? Let's classify it.</h2><a class="pill a lt" href="#classifier">Open the classifier<span class="b"><svg class="i"><use href="#au"/></svg></span></a></div>
+ <div class="fcols"><div><a class="brand" href="#home"><span>Field Key</span></a><p>A field key to road vehicles: how classification systems work, with a decision tree you can read.</p></div>
+  <div><h4>Learn more</h4><ul><li><a href="#learn-more">Data, model &amp; context</a></li><li><a href="#metrics">Metrics</a></li></ul></div>
+  <div><h4>Tools</h4><ul><li><a href="#classifier">Classifier</a></li><li><a href="#batch-section">Batch CSV</a></li><li><a href="#video-section">Video counts</a></li><li><a href="#sensitivity-section">Sensitivity</a></li></ul></div></div>
+ <div class="lg2"><span>© 2026 Field Key. All rights reserved.</span><span><a href="#home">Back to top ↑</a> · Python · scikit-learn · Decision Tree</span></div>
+</div><div class="wm" aria-hidden="true">CLASSIFY</div></footer>
+
+<div class="menu" id="menu" role="dialog" aria-modal="true" aria-label="Menu"><div class="shell mt"><a class="brand" href="#home" data-m>Field Key</a><button class="mx" id="mc"><svg class="i"><use href="#x"/></svg>Close</button></div>
+ <nav class="shell mn" aria-label="Menu" id="mnav"></nav>
+ <div class="shell mbt"><span>Local time — <b id="c3" style="font-weight:400"></b></span><a href="#classifier" data-m>Try the classifier →</a></div></div>
+
+<!-- Lightbox Image Modal -->
+<div id="imageLightbox" class="lightbox-modal" role="dialog" aria-modal="true" aria-label="Expanded Image View">
+ <div class="lightbox-content">
+  <button class="lightbox-close" id="lightboxClose" aria-label="Close image"><svg class="i"><use href="#x"/></svg></button>
+  <h4 id="lightboxTitle" style="color:var(--ink);margin-bottom:.75rem;font-size:1rem;font-weight:700"></h4>
+  <img id="lightboxImg" alt="Enlarged model evaluation visualization">
+ </div>
+</div>
+
+<script>window.TREE = {{ tree|tojson }};window.CLASS_STATS = {{ class_stats|tojson }};</script>
+<script src="/static/js/main.js"></script>
+</body>
+</html>
